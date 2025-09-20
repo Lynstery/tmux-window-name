@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from ast import Interactive
 import logging
 import logging.config
 import tempfile
@@ -167,9 +166,10 @@ class Options:
     show_args_programs: List[str] = field(default_factory=lambda: ['nvim', 'ssh'])
     ignored_programs: List[str] = field(default_factory=lambda: [])
     #dir_icon: str = '  '
-    dir_icon: str = ' …/'
+    #dir_icon: str = ' …/'
+    dir_icon: str = ' '
     max_name_len: int = 30
-    use_tilde: bool = False
+    use_tilde: bool = True
     icon_style: IconStyle = IconStyle.NAME_AND_ICON
     custom_icons: dict = field(default_factory=lambda: {})  # User-defined program icons
     substitute_sets: List[Tuple] = field(
@@ -231,9 +231,9 @@ def apply_icon_if_in_style(program_name: str, colon_path_name: str, options: Opt
             if "-zsh" in program_name or "-bash" in program_name:
                 new_name = f'{icon}{colon_path_name}'
             elif options.icon_style == IconStyle.ICON or ("-zsh" in program_name or "-bash" in program_name):
-                new_name = f'⦗{icon}{colon_path_name}⦘'
+                new_name = f'[{icon}{colon_path_name}]'
             elif options.icon_style == IconStyle.NAME_AND_ICON:
-                new_name = f'⦗{icon} {program_name}⦘{colon_path_name}'
+                new_name = f'[{icon} {program_name}]{colon_path_name}'
 
 
     logging.debug(f'Applied icon {icon} to name, {program_name}{colon_path_name}. New name: {new_name}')
