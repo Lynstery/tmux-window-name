@@ -10,9 +10,8 @@ It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 
 ## Index
 * [Use case](#use-case)
-* [Usage](#usage)
-* [How it works](#how-it-works)
 * [Installation](#installation)
+* [Usage](#usage)
 * [Configuration Options](#configuration-options)
 
 ## Dependencies
@@ -32,7 +31,20 @@ You tried to configure `automatic-rename` and `automatic-rename-format` but you 
 This plugin comes to solve those issues to name your windows inspired by IDE tablines.\
 It makes sure to show you the shortest path possible!
 
-#### Examples
+### How it works
+Each time you unfocus from a pane, the plugin looks for every active pane in your session windows.
+
+_**Note**_: if you have a better hook in mind make sure to notify me!
+
+1. If shell is running, it shows the current dir as short as possible, `long_dir/a` -> `a`, it avoids [intersections](#Intersections) too!
+1. If "regular" program is running it shows the program with the args, `less ~/my_file` -> `[less ~/my_file]`.
+1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `[git diff] a`, it avoids [intersections](#Intersections) too!
+
+#### Intersections
+
+To make the shortest path as possible the plugin finds the shortest not common path if your windows.
+
+### Examples
 This session:
 ```
 1. ~/workspace/my_project
@@ -67,10 +79,53 @@ Will display:
 
 For more scenarios you check out the [tests](tests/test_exclusive_paths.py).
 
+--- 
+
+
+
+--- 
+
+## Installation
+
+### Installation with [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
+
+Make sure you have tpm installed, then add plugin to the list of TPM plugins:
+
+```tmux.conf
+set -g @plugin 'lynstery/tmux-window-name'
+```
+
+_**Note**_: _**Note**_: if you are using [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) `tmux-window-name` must be loaded before `tmux-resurrect`.
+
+```tmux.conf
+set -g @plugin 'lynstery/tmux-window-name'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+```
+
+Press prefix + I to install it.
+
+### Manual Installation
+
+Clone the repo:
+
+```bash
+$ git clone https://github.com/lynstery/tmux-window-name.git ~/clone/path
+```
+
+Add this line to your .tmux.conf:
+
+```tmux.conf
+run-shell ~/clone/path/tmux_window_name.tmux
+```
+
+Reload TMUX environment with:
+
+```bash
+$ tmux source-file ~/.tmux.conf
+```
+
 ## Usage
 [Install](#installation) the plugin and let it name your windows :)
-
-_**Note**_: if you are using [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) `tmux-window-name` must be loaded before `tmux-resurrect`
 
 You can `tmux rename-window` manually to set your own window names, to re-enable automatic renames set run `tmux rename-window ""`
 
@@ -116,59 +171,6 @@ Make sure the hooks that used aren't overridden.
 
 ---
 
-## How it works
-Each time you unfocus from a pane, the plugin looks for every active pane in your session windows.
-
-_**Note**_: if you have a better hook in mind make sure to notify me!
-
-1. If shell is running, it shows the current dir as short as possible, `long_dir/a` -> `a`, it avoids [intersections](#Intersections) too!
-1. If "regular" program is running it shows the program with the args, `less ~/my_file` -> `[less ~/my_file]`.
-1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `[git diff] a`, it avoids [intersections](#Intersections) too!
-
-### Intersections
-
-To make the shortest path as possible the plugin finds the shortest not common path if your windows.
-
---- 
-
-## Installation
-
-### Installation with [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
-
-Make sure you have tpm installed, then add plugin to the list of TPM plugins:
-
-```tmux.conf
-set -g @plugin 'lynstery/tmux-window-name'
-```
-
-_**Note**_: set `tmux-window-name` before `tmux-resurrect` (if you are using `tmux-resurrect`)
-
-```tmux.conf
-set -g @plugin 'lynstery/tmux-window-name'
-set -g @plugin 'tmux-plugins/tmux-resurrect'
-```
-
-Press prefix + I to install it.
-
-### Manual Installation
-
-Clone the repo:
-
-```bash
-$ git clone https://github.com/lynstery/tmux-window-name.git ~/clone/path
-```
-
-Add this line to your .tmux.conf:
-
-```tmux.conf
-run-shell ~/clone/path/tmux_window_name.tmux
-```
-
-Reload TMUX environment with:
-
-```bash
-$ tmux source-file ~/.tmux.conf
-```
 
 ## Configuration Options
 
