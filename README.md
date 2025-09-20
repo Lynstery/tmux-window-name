@@ -2,7 +2,7 @@
 
 A plugin to name your tmux windows smartly, like IDE's.
 
-![Tmux Window Name Screenshot](screenshots/example.png)
+Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-name) and makes some personal adjustments. It only cover my daily workflow (ssh, neovim, python, bash script, ...).
 
 ## Index
 * [Use case](#use-case)
@@ -14,9 +14,8 @@ A plugin to name your tmux windows smartly, like IDE's.
 ## Dependencies
 
 * tmux (Tested on 3.0a)
-* Python 3.6.8+ (Maybe can be lower, tested on 3.6.8)
-* pip
-* [libtmux](https://github.com/tmux-python/libtmux) >0.16
+* Python 3.6.8+ (Maybe can be lower, tested on 3.6.8) with [libtmux](https://github.com/tmux-python/libtmux) >0.16
+* Nerd Font Icons
 
 ## Use case
 
@@ -37,10 +36,10 @@ This session:
 ```
 Will display:
 ```
-1. my_project
-2. my_project/tests
-3. my_other_project
-4. my_other_project/tests
+1. …/my_project
+2. …/my_project/tests
+3. …/my_other_project
+4. …/my_other_project/tests
 ```
 
 ---
@@ -54,10 +53,10 @@ It knows which programs runs
 ```
 Will display:
 ```
-1. nvim:my_project
-2. my_project
-3. git diff:my_other_project
-4. my_other_project
+1. [nvim] …/my_project
+2. …/my_project
+3. [git diff] …/my_other_project
+4. …/my_other_project
 ```
 
 For more scenarios you check out the [tests](tests/test_exclusive_paths.py).
@@ -112,7 +111,7 @@ _**Note**_: if you have a better hook in mind make sure to notify me!
 
 1. If shell is running, it shows the current dir as short as possible, `long_dir/a` -> `a`, it avoids [intersections](#Intersections) too!
 1. If "regular" program is running it shows the program with the args, `less ~/my_file` -> `less ~/my_file`.
-1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `git diff:a`, it avoids [intersections](#Intersections) too!
+1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `git diff …/a`, it avoids [intersections](#Intersections) too!
 
 ### Intersections
 
@@ -139,13 +138,13 @@ python3 -m pip install dataclasses --user
 Add plugin to the list of TPM plugins:
 
 ```tmux.conf
-set -g @plugin 'ofirgall/tmux-window-name'
+set -g @plugin 'lynstery/tmux-window-name'
 ```
 
 _**Note**_: set `tmux-window-name` before `tmux-resurrect` (if you are using `tmux-resurrect`)
 
 ```tmux.conf
-set -g @plugin 'ofirgall/tmux-window-name'
+set -g @plugin 'lynstery/tmux-window-name'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 ```
 
@@ -156,7 +155,7 @@ Press prefix + I to install it.
 Clone the repo:
 
 ```bash
-$ git clone https://github.com/ofirgall/tmux-window-name.git ~/clone/path
+$ git clone https://github.com/lynstery/tmux-window-name.git ~/clone/path
 ```
 
 Add this line to your .tmux.conf:
@@ -172,24 +171,31 @@ $ tmux source-file ~/.tmux.conf
 ```
 
 ## Configuration Options
-_**Note**_: All options are evaluated with [eval](https://docs.python.org/3/library/functions.html#eval) be careful!
 
 ### `@tmux_window_name_shells`
 
-Shell programs, will show dir instead of the program
+Interactive shell programs, will only show icon (promty symbol) when setting icon_style=icon_and_name.
 
 ```tmux.conf
-set -g @tmux_window_name_shells "['bash', 'fish', 'sh', 'zsh']"
+set -g @tmux_window_name_shells "['-bash', '-sh', '-zsh']"
+```
+
+### `@tmux_window_name_show_args_programs`
+
+Show arguments that the program has been ran with.
+
+```tmux.conf
+set -g @tmux_window_name_show_program_args "['ssh', 'nvim', 'vim', vi']"
 ```
 
 ### `@tmux_window_name_dir_programs`
 
 Programs that will show the dir name too.
 
-E.g: `git diff` running in `long_dir/my_repo` will show `git diff:my_repo`
+E.g: `git diff` running in `long_dir/my_repo` will show `git diff …/my_repo`
 
 ```tmux.conf
-set -g @tmux_window_dir_programs "['nvim', 'vim', 'vi', 'git']"
+set -g @tmux_window_dir_programs "['-bash', '-sh', '-zsh', nvim', 'vim', 'vi', 'git', 'ssh']"
 ```
 
 ### `@tmux_window_name_ignored_programs`
@@ -205,60 +211,8 @@ set -g @tmux_window_name_ignored_programs "['sqlite3']" # Default is []
 Maximum name length of a window
 
 ```tmux.conf
-set -g @tmux_window_name_max_name_len "20"
+set -g @tmux_window_name_max_name_len "30"
 ```
-
-### `@tmux_window_name_use_tilde`
-
-Replace `$HOME` with `~` in window names
-
-```tmux.conf
-set -g @tmux_window_name_use_tilde "False"
-```
-
-### `@tmux_window_name_show_program_args`
-
-Show arguments that the program has been ran with.
-
-```tmux.conf
-set -g @tmux_window_name_show_program_args "True"
-```
-
-### `@tmux_window_name_substitute_sets`
-
-Replace program command lines with [re.sub](https://docs.python.org/3/library/re.html#re.sub). \
-The options expect list of tuples with 2 elements, `pattern` and `repl`. \
-E.g: The example below will replace `/usr/bin/python3 /usr/bin/ipython3` with `ipython3`, and the same for ipython2
-
-Note: use `~/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py --print_programs` to see the full program command line and the results of the substitute.
-
-```tmux.conf
-set -g @tmux_window_name_substitute_sets "[('.+ipython2', 'ipython2'), ('.+ipython3', 'ipython3')]"
-
-# Same example but with regex groups
-set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>')]"
-
-# Default Value:
-set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>'), ('^(/usr)?/bin/(.+)', '\g<2>'), ('(bash) (.+)/(.+[ $])(.+)', '\g<3>\g<4>'), ('.+poetry shell', 'poetry')]"
-	# 0: from example
-	# 1: removing `/usr/bin` and `/bin` prefixes of files
-	# 2: removing `bash /long/path/for/bashscript`
-	# 3: changing "poetry shell" to "poetry"
-```
-
-### `@tmux_window_name_dir_substitute_sets`
-
-Replace dir lines with [re.sub](https://docs.python.org/3/library/re.html#re.sub). \
-The options expect list of tuples with 2 elements, `pattern` and `repl` as above. 
-E.g: The example below will replace `tmux-resurrect` with `resurrect`
-
-```tmux.conf
-set -g @tmux_window_name_dir_substitute_sets "[('tmux-(.+)', '\\g<1>')]"
-
-# Default Value:
-set -g @tmux_window_name_dir_substitute_sets "[]"
-```
-
 ### `@tmux_window_name_icon_style`
 
 Configure how icons are displayed in window names. \
@@ -278,6 +232,13 @@ set -g @tmux_window_name_icon_style "'name_and_icon'"
 set -g @tmux_window_name_icon_style "'name'"
 ```
 
+### `@tmux_window_name_dir_icon`
+
+Configure the directory icon. 
+```tmux.conf
+set -g @tmux_window_name_dir_icon '…/'
+```
+
 ### `@tmux_window_name_custom_icons`
 
 Customize icons for specific programs. \
@@ -293,6 +254,51 @@ set -g @tmux_window_name_custom_icons '{}'
 
 _**Note**_: Icons can be any Unicode characters, including emoji or Nerd Font icons. \
 If using Nerd Font icons, make sure your terminal supports them.
+
+### `@tmux_window_name_use_tilde`
+
+Replace `$HOME` with `~` in window names
+
+```tmux.conf
+set -g @tmux_window_name_use_tilde "False"
+```
+
+### `@tmux_window_name_substitute_sets`
+
+Replace program command lines with [re.sub](https://docs.python.org/3/library/re.html#re.sub). \
+The options expect list of tuples with 2 elements, `pattern` and `repl`. \
+E.g: The example below will replace `/usr/bin/python3 /usr/bin/ipython3` with `ipython3`, and the same for ipython2
+
+Note: use `~/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py --print_programs` to see the full program command line and the results of the substitute.
+
+```tmux.conf
+set -g @tmux_window_name_substitute_sets "[('.+ipython2', 'ipython2'), ('.+ipython3', 'ipython3')]"
+```
+# Same example but with regex groups
+set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>')]"
+
+# Default Value:
+
+set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>'), ('^(/usr)?/bin/(.+)', '\g<2>'), ('(bash) (.+)/(.+[ $])(.+)', '\g<3>\g<4>'), ('.+poetry shell', 'poetry')]"
+	# 0: from example
+	# 1: removing `/usr/bin` and `/bin` prefixes of files
+	# 2: removing `bash /long/path/for/bashscript`
+	# 3: changing "poetry shell" to "poetry"
+
+### `@tmux_window_name_dir_substitute_sets`
+
+Replace dir lines with [re.sub](https://docs.python.org/3/library/re.html#re.sub). \
+The options expect list of tuples with 2 elements, `pattern` and `repl` as above. 
+E.g: The example below will replace `tmux-resurrect` with `resurrect`
+
+```tmux.conf
+set -g @tmux_window_name_dir_substitute_sets "[('tmux-(.+)', '\\g<1>')]"
+
+# Default Value:
+set -g @tmux_window_name_dir_substitute_sets "[]"
+```
+
+
 
 ---
 
@@ -310,14 +316,6 @@ set -g @tmux_window_name_log_level "'DEBUG'"
 # Default Value:
 set -g @tmux_window_name_log_level "'WARNING'"
 ```
-
----
-
-# Development
-Run `ruff format` before applying PR
-
-# Testing
-Run `pytest` at the root dir
 
 ---
 
