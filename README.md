@@ -6,7 +6,7 @@ Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-
 
 It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 
-![Tmux Window Name Screenshot](screenshots/shot.png)
+![Tmux Window Name Screenshot](screenshots/example.png)
 
 ## Index
 * [Use case](#use-case)
