@@ -18,8 +18,10 @@ It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 ## Dependencies
 
 * tmux (Tested on 3.0a)
-* [uv python env manager](https://github.com/astral-sh/uv)
+* [uv](https://github.com/astral-sh/uv)
 * [Nerd Font](https://www.nerdfonts.com)
+
+_**Note**_: uv is used to avoid manually set up a python env to run the script
 
 ## Use case
 
@@ -82,22 +84,28 @@ You can add autocmd to rename after nvim launches and stops as so:
 local uv = vim.uv
 
 vim.api.nvim_create_autocmd({ 'VimEnter', 'VimLeave' }, {
-	callback = function()
-		if vim.env.TMUX_PLUGIN_MANAGER_PATH then
-			uv.spawn(vim.env.TMUX_PLUGIN_MANAGER_PATH .. '/tmux-window-name/scripts/rename_session_windows.py', {})
-		end
-	end,
+  callback = function()
+    if vim.env.TMUX_PLUGIN_MANAGER_PATH then
+      vim.loop.spawn("uv", {
+        args = {
+          "run",
+          "--quiet",
+          vim.env.TMUX_PLUGIN_MANAGER_PATH .. "/tmux-window-name/scripts/rename_session_windows.py",
+        },
+      })
+    end
+  end,
 })
 ```
 
 ### Automatic rename after changing dir
 By default `tmux-window-name` hooks `after-select-window` which trigged when switching windows, you can add hook in your `.shellrc` to execute `tmux-window-name`
+
 ##### .zshrc
 ```bash
 tmux-window-name() {
-	($TMUX_PLUGIN_MANAGER_PATH/tmux-window-name/scripts/rename_session_windows.py &)
+  (uv run --quiet $TMUX_PLUGIN_MANAGER_PATH/tmux-window-name/scripts/rename_session_windows.py &)
 }
-
 add-zsh-hook chpwd tmux-window-name
 ```
 
