@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.7"
+# dependencies = [
+#    "libtmux",
+# ]
+# ///
 
 import logging
 import logging.config
