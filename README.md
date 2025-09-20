@@ -9,6 +9,7 @@ It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 ![Tmux Window Name Screenshot](screenshots/example.png)
 
 ## Index
+* [Dependencies](#dependencies)
 * [Use case](#use-case)
 * [Installation](#installation)
 * [Usage](#usage)
@@ -79,11 +80,7 @@ Will display:
 
 For more scenarios you check out the [tests](tests/test_exclusive_paths.py).
 
---- 
-
-
-
---- 
+---
 
 ## Installation
 
