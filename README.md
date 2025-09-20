@@ -273,20 +273,15 @@ Replace program command lines with [re.sub](https://docs.python.org/3/library/re
 The options expect list of tuples with 2 elements, `pattern` and `repl`. \
 E.g: The example below will replace `/usr/bin/python3 /usr/bin/ipython3` with `ipython3`, and the same for ipython2
 
-Note: use `~/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py --print_programs` to see the full program command line and the results of the substitute.
+Note: use `uv run ~/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py --print_programs` to see the full program command line and the results of the substitute.
 
 ```tmux.conf
 set -g @tmux_window_name_substitute_sets "[('.+ipython2', 'ipython2'), ('.+ipython3', 'ipython3')]"
-```
 
-# Same example but with regex groups
-
-```tmux.conf
+# Same example but with regex groups:
 set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>')]"
-```
-# Default Value:
 
-```
+# Default Value:
 set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>'), ('^(/usr)?/bin/(.+)', '\g<2>'), ('(bash) (.+)/(.+[ $])(.+)', '\g<3>\g<4>'), ('.+poetry shell', 'poetry')]"
 	# 0: from example
 	# 1: removing `/usr/bin` and `/bin` prefixes of files
