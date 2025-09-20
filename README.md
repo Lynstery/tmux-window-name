@@ -40,10 +40,10 @@ This session:
 ```
 Will display:
 ```
-1. …/my_project
-2. …/my_project/tests
-3. …/my_other_project
-4. …/my_other_project/tests
+1. my_project
+2. my_project/tests
+3. my_other_project
+4. my_other_project/tests
 ```
 
 ---
@@ -57,10 +57,10 @@ It knows which programs runs
 ```
 Will display:
 ```
-1. [nvim] …/my_project
-2. …/my_project
-3. [git diff] …/my_other_project
-4. …/my_other_project
+1. [nvim] my_project
+2. my_project
+3. [git diff] my_other_project
+4. my_other_project
 ```
 
 For more scenarios you check out the [tests](tests/test_exclusive_paths.py).
@@ -114,8 +114,8 @@ Each time you unfocus from a pane, the plugin looks for every active pane in you
 _**Note**_: if you have a better hook in mind make sure to notify me!
 
 1. If shell is running, it shows the current dir as short as possible, `long_dir/a` -> `a`, it avoids [intersections](#Intersections) too!
-1. If "regular" program is running it shows the program with the args, `less ~/my_file` -> `less ~/my_file`.
-1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `git diff …/a`, it avoids [intersections](#Intersections) too!
+1. If "regular" program is running it shows the program with the args, `less ~/my_file` -> `[less ~/my_file]`.
+1. If "special" program is running it shows the program with the dir attached, `git diff` (in `long_dir/a`) -> `[git diff] a`, it avoids [intersections](#Intersections) too!
 
 ### Intersections
 
@@ -241,6 +241,9 @@ set -g @tmux_window_name_icon_style "'name'"
 Configure the directory icon. 
 ```tmux.conf
 set -g @tmux_window_name_dir_icon '…/'
+
+# Default Value:
+set -g @tmux_window_name_icon_style " "
 ```
 
 ### `@tmux_window_name_custom_icons`
