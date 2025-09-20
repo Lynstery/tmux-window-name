@@ -246,6 +246,8 @@ set -g @tmux_window_name_dir_icon '…/'
 Customize icons for specific programs. \
 The value should be a dictionary mapping program names to their icons.
 
+You can change the prompt symbol by setting icons for "-zsh" or "-bash".
+
 ```tmux.conf
 # Custom icons example
 set -g @tmux_window_name_custom_icons '{"python": "🐍", "custom_app": "📦"}'
