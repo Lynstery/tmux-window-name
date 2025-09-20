@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from ast import Interactive
 import logging
 import logging.config
 import tempfile
@@ -24,30 +25,24 @@ HOOK_INDEX = 8921
 HOME_DIR = os.path.expanduser('~')
 USR_BIN_REMOVER = (r'^(/usr)?/bin/(.+)', r'\g<2>')
 
+INTERACTIVE_ICON = ''
+
 DEFAULT_PROGRAM_ICONS = {
-    'nvim': '',  # nf-dev-vim
-    'vim': '',  # nf-dev-vim
-    'vi': '',  # nf-dev-vim
-    'git': '',  # nf-dev-git
-    'python': '',  # nf-dev-python
-    'node': '',  # nf-dev-nodejs
-    'npm': '',  # nf-dev-nodejs
-    'yarn': '',  # nf-dev-nodejs
-    'docker': '',  # nf-dev-docker
-    'kubectl': '',  # nf-dev-kubernetes
-    'go': '',  # nf-dev-go
-    'rust': '',  # nf-dev-rust
-    'cargo': '',  # nf-dev-rust
-    'php': '',  # nf-dev-php
-    'ruby': '',  # nf-dev-ruby
-    'java': '',  # nf-dev-java
-    'mvn': '',  # nf-dev-java
-    'gradle': '',  # nf-dev-java
-    'bash': '',  # nf-dev-terminal
-    'zsh': '',  # nf-dev-terminal
-    'fish': '',  # nf-dev-terminal
-    'sh': '',  # nf-dev-terminal
+    'ssh': '',
+    'nvim': '',
+    'vim': '',
+    'vi': '',
+    'python': '',
+    'python3': '',
+    'Python': '',
+    'docker': '',
+    'bash': '󱜧',
+    'sh': '󱜧',
+    'zsh': '󱜧',
+    '-zsh': INTERACTIVE_ICON,
+    '-bash': INTERACTIVE_ICON
 }
+
 
 
 def get_option(server: Server, option: str, default: Any) -> Any:
@@ -168,12 +163,14 @@ class IconStyle(str, Enum):
 
 @dataclass
 class Options:
-    shells: List[str] = field(default_factory=lambda: ['bash', 'fish', 'sh', 'zsh'])
-    dir_programs: List[str] = field(default_factory=lambda: ['nvim', 'vim', 'vi', 'git'])
+    dir_programs: List[str] = field(default_factory=lambda: ['nvim', 'vim', 'vi', 'git', 'zsh', 'bash', '-zsh', '-bash'])
+    show_args_programs: List[str] = field(default_factory=lambda: ['nvim', 'ssh'])
     ignored_programs: List[str] = field(default_factory=lambda: [])
-    max_name_len: int = 20
+    #dir_icon: str = '  '
+    dir_icon: str = ' …/'
+    max_name_len: int = 30
     use_tilde: bool = False
-    icon_style: IconStyle = IconStyle.NAME
+    icon_style: IconStyle = IconStyle.NAME_AND_ICON
     custom_icons: dict = field(default_factory=lambda: {})  # User-defined program icons
     substitute_sets: List[Tuple] = field(
         default_factory=lambda: [
@@ -184,7 +181,6 @@ class Options:
         ]
     )
     dir_substitute_sets: List[Tuple] = field(default_factory=lambda: [])
-    show_program_args: bool = True
     log_level: str = 'WARNING'
 
     @staticmethod
@@ -213,11 +209,8 @@ class Options:
 
 def get_program_icon(program_name: str, options: Options) -> str:
     """Get the nerd font icon for a program name."""
-    # Remove any path components and arguments
-    base_name = program_name.split()[0].split('/')[-1]
     # If the name contains a colon, use the part before it
-    if ':' in base_name:
-        base_name = base_name.split(':')[0]
+    base_name = program_name.split(' ')[0]
 
     # First check custom icons, then fall back to built-in icons
     icon = options.custom_icons.get(base_name) or DEFAULT_PROGRAM_ICONS.get(base_name, '')
@@ -229,18 +222,21 @@ def get_program_icon(program_name: str, options: Options) -> str:
     return icon
 
 
-def apply_icon_if_in_style(name: str, options: Options) -> str:
-    new_name = name
+def apply_icon_if_in_style(program_name: str, colon_path_name: str, options: Options) -> str:
+    new_name = f"{program_name}{colon_path_name}"
     if options.icon_style in [IconStyle.ICON, IconStyle.NAME_AND_ICON]:
-        icon = get_program_icon(name, options)
+        icon = get_program_icon(program_name, options)
 
         if icon:
-            if options.icon_style == IconStyle.ICON:
-                new_name = f'{icon}'
+            if "-zsh" in program_name or "-bash" in program_name:
+                new_name = f'{icon}{colon_path_name}'
+            elif options.icon_style == IconStyle.ICON or ("-zsh" in program_name or "-bash" in program_name):
+                new_name = f'⦗{icon}{colon_path_name}⦘'
             elif options.icon_style == IconStyle.NAME_AND_ICON:
-                new_name = f'{icon} {name}'
+                new_name = f'⦗{icon} {program_name}⦘{colon_path_name}'
 
-            logging.debug(f'Applied icon {icon} to name, {name}. New name: {new_name}')
+
+    logging.debug(f'Applied icon {icon} to name, {program_name}{colon_path_name}. New name: {new_name}')
     return new_name
 
 
@@ -269,11 +265,13 @@ def get_current_program(running_programs: List[bytes], pane: TmuxPane, options: 
             program = program[1:]
             program_name = program[0].decode()
             program_name_stripped = re.sub(USR_BIN_REMOVER[0], USR_BIN_REMOVER[1], program_name)
+            program_name_stripped = program_name.split("/")[-1]
+            program[0] = program_name_stripped.encode("utf-8")
             logging.debug(
                 f'program={program} program_name={program_name} program_name_stripped={program_name_stripped}'
             )
 
-            if len(program) > 1 and 'scripts/rename_session_windows.py' in program[1].decode():
+            if len(program) > 1 and 'rename_session_windows.py' in program[1].decode():
                 logging.debug(f'skipping {program[1]}, its the script')
                 continue
 
@@ -281,13 +279,7 @@ def get_current_program(running_programs: List[bytes], pane: TmuxPane, options: 
                 logging.debug(f'skipping {program_name_stripped}, its ignored')
                 continue
 
-            # Ignore shells
-            if program_name_stripped in options.shells:
-                shell_program = parse_shell_command(program)
-                logging.debug(f'its a shell, parsed shell program {shell_program}')
-                return shell_program
-
-            if not options.show_program_args:
+            if program_name_stripped not in options.show_args_programs:
                 return program[0].decode()
 
             return b' '.join(program).decode()
@@ -315,7 +307,9 @@ def get_session_active_panes(session: Session) -> List[TmuxPane]:
 def rename_window(server: Server, window_id: str, window_name: str, max_name_len: int, options: Options):
     logging.debug(f'renaming window_id={window_id} to window_name={window_name}')
 
-    window_name = apply_icon_if_in_style(window_name, options)
+    program_name, colon, path_name = window_name.partition(':')
+    window_name = apply_icon_if_in_style(program_name, colon + path_name, options)
+    window_name = window_name.replace(':', options.dir_icon)
     window_name = window_name[:max_name_len]
     logging.debug(f'shortened name window_name={window_name}')
 
@@ -359,7 +353,7 @@ def rename_windows(server: Server, options: Options):
         for pane in panes_with_programs:
             enabled_in_window = get_window_option(server, pane.info.window_id, 'enabled', 1)
             if not enabled_in_window:
-                logging.debug(f'tmux winodw isnt enabled in {pane.info.window_id}')
+                logging.debug(f'tmux window isn\'t enabled in {pane.info.window_id}')
                 continue
 
             program_name = get_program_if_dir(str(pane.program), options.dir_programs)
@@ -462,6 +456,7 @@ def main():
     logging.basicConfig(
         level=log_level, filename=log_file, format='%(levelname)s - %(filename)s:%(lineno)d %(funcName)s() %(message)s'
     )
+    logging.debug(f'=== START ===')
     logging.debug(f'Args: {args}')
     logging.debug(f'Options: {options}')
 
