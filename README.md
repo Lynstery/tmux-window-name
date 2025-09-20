@@ -2,7 +2,9 @@
 
 A plugin to name your tmux windows smartly, like IDE's.
 
-Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-name) and makes some personal adjustments. It only cover my daily workflow (ssh, neovim, python, bash script, ...).
+Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-name) and makes some personal adjustments. 
+
+It only cover my daily workflow (ssh, neovim, python, bash script, ...).
 
 ## Index
 * [Use case](#use-case)
