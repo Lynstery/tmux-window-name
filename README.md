@@ -18,7 +18,7 @@ It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 ## Dependencies
 
 * tmux (Tested on 3.0a)
-* Python 3.6.8+ (Maybe can be lower, tested on 3.6.8) with [libtmux](https://github.com/tmux-python/libtmux) >0.16
+* [uv python env manager](https://github.com/astral-sh/uv)
 * [Nerd Font](https://www.nerdfonts.com)
 
 ## Use case
@@ -125,21 +125,9 @@ To make the shortest path as possible the plugin finds the shortest not common p
 
 ## Installation
 
-### Install libtmux (must)
-_**Note**_: Make sure you are using the `user` python and not `sudo` python or `virutalenv` python!
-
-```sh
-python3 -m pip install --user libtmux
-```
-
-### Install dataclasses (for Python 3.6.X only)
-```sh
-python3 -m pip install dataclasses --user
-```
-
 ### Installation with [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
-Add plugin to the list of TPM plugins:
+Make sure you have tpm installed, then add plugin to the list of TPM plugins:
 
 ```tmux.conf
 set -g @plugin 'lynstery/tmux-window-name'
