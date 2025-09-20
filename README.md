@@ -17,7 +17,7 @@ It only cover my daily workflow (ssh, neovim, python, bash script, ...).
 
 * tmux (Tested on 3.0a)
 * Python 3.6.8+ (Maybe can be lower, tested on 3.6.8) with [libtmux](https://github.com/tmux-python/libtmux) >0.16
-* Nerd Font Icons
+* [Nerd Font](https://www.nerdfonts.com)
 
 ## Use case
 
@@ -276,16 +276,21 @@ Note: use `~/.tmux/plugins/tmux-window-name/scripts/rename_session_windows.py --
 ```tmux.conf
 set -g @tmux_window_name_substitute_sets "[('.+ipython2', 'ipython2'), ('.+ipython3', 'ipython3')]"
 ```
-# Same example but with regex groups
-set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>')]"
 
+# Same example but with regex groups
+
+```tmux.conf
+set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>')]"
+```
 # Default Value:
 
+```
 set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>'), ('^(/usr)?/bin/(.+)', '\g<2>'), ('(bash) (.+)/(.+[ $])(.+)', '\g<3>\g<4>'), ('.+poetry shell', 'poetry')]"
 	# 0: from example
 	# 1: removing `/usr/bin` and `/bin` prefixes of files
 	# 2: removing `bash /long/path/for/bashscript`
 	# 3: changing "poetry shell" to "poetry"
+```
 
 ### `@tmux_window_name_dir_substitute_sets`
 
@@ -299,8 +304,6 @@ set -g @tmux_window_name_dir_substitute_sets "[('tmux-(.+)', '\\g<1>')]"
 # Default Value:
 set -g @tmux_window_name_dir_substitute_sets "[]"
 ```
-
-
 
 ---
 
