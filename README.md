@@ -21,7 +21,7 @@ It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 * [uv](https://github.com/astral-sh/uv)
 * [Nerd Font](https://www.nerdfonts.com)
 
-_**Note**_: uv is used to avoid manually set up a python env to run the script
+_**Note**_: uv is used to avoid manually setting up a python env to run the script. there's an inline script metadata in the python script that declares dependencies.
 
 ## Use case
 
