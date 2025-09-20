@@ -388,7 +388,10 @@ def rename_windows(server: Server, options: Options):
             if p.program is not None:
                 p.program = substitute_name(p.program, options.substitute_sets)
                 display_path = f'{p.program}:{display_path}'
-
+            else:                 
+                p.program = "-zsh" # assume it is a interactive shell                 
+                display_path = f'{p.program}:{display_path}'
+                
             rename_window(server, str(p.info.window_id), str(display_path), options.max_name_len, options)
 
 
