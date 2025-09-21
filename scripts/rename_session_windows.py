@@ -173,7 +173,8 @@ class Options:
     #dir_icon: str = '  '
     #dir_icon: str = ' …/'
     dir_icon: str = ' '
-    max_name_len: int = 30
+    max_total_len: int = 30
+    max_args_len: int = 10
     use_tilde: bool = True
     icon_style: IconStyle = IconStyle.NAME_AND_ICON
     custom_icons: dict = field(default_factory=lambda: {})  # User-defined program icons
@@ -308,14 +309,25 @@ def get_session_active_panes(session: Session) -> List[TmuxPane]:
 
     return [p for p in session.server.panes if p.pane_active == '1' and p.window_id in session_windows_ids]
 
+def shrink_command(cmd: str, max_args_len: int, ellipsis: str = "…"):
+    parts = re.split(r"\s+", cmd.strip(), maxsplit=1)
+    program = parts[0]
+    if len(parts) == 1 or max_args_len <= 0:
+        return program
+    tail = parts[1]
+    if len(tail) <= max_args_len:
+        return f"{program} {tail}"
+    return f"{program} {tail[:max_args_len]}{ellipsis}"
 
-def rename_window(server: Server, window_id: str, window_name: str, max_name_len: int, options: Options):
+
+def rename_window(server: Server, window_id: str, window_name: str, max_total_len: int, options: Options):
     logging.debug(f'renaming window_id={window_id} to window_name={window_name}')
 
     program_name, colon, path_name = window_name.partition(':')
+    program_name = shrink_command(program_name, options.max_args_len)
     window_name = apply_icon_if_in_style(program_name, colon + path_name, options)
     window_name = window_name.replace(':', options.dir_icon)
-    window_name = window_name[:max_name_len]
+    window_name = window_name[:max_total_len]
     logging.debug(f'shortened name window_name={window_name}')
 
     server.cmd('rename-window', '-t', window_id, window_name)
@@ -370,7 +382,7 @@ def rename_windows(server: Server, options: Options):
 
             logging.debug(f'processing program without dir: {str(pane.program)}')
             pane.program = substitute_name(str(pane.program), options.substitute_sets)
-            rename_window(server, str(pane.info.window_id), pane.program, options.max_name_len, options)
+            rename_window(server, str(pane.info.window_id), pane.program, options.max_total_len, options)
 
         exclusive_paths = get_exclusive_paths(panes_with_dir)
         logging.debug(
@@ -388,11 +400,11 @@ def rename_windows(server: Server, options: Options):
             if p.program is not None:
                 p.program = substitute_name(p.program, options.substitute_sets)
                 display_path = f'{p.program}:{display_path}'
-            else:                 
-                p.program = "-zsh" # assume it is a interactive shell                 
+            else:
+                p.program = "-zsh" # assume it is a interactive shell
                 display_path = f'{p.program}:{display_path}'
-                
-            rename_window(server, str(p.info.window_id), str(display_path), options.max_name_len, options)
+
+            rename_window(server, str(p.info.window_id), str(display_path), options.max_total_len, options)
 
 
 # Fix pane path according to the options
@@ -431,7 +443,7 @@ def print_programs(server: Server, options: Options):
     for pane in panes_programs:
         if pane.program:
             program_name = substitute_name(pane.program, options.substitute_sets)
-            program_name = apply_icon_if_in_style(program_name, options)
+            program_name = apply_icon_if_in_style(program_name, "", options)
             print(f'{pane.program} -> {program_name}')
 
 

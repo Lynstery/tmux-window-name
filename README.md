@@ -1,6 +1,6 @@
 # Auto Window Rename for tmux
 
-Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-name) and makes some personal adjustments. 
+Forked from [ofirgall/tmux-window-name](https://github.com/ofirgall/tmux-window-name) and makes some personal adjustments.
 
 It only covers my daily workflow (ssh, neovim, python, bash script, ...).
 
@@ -205,13 +205,24 @@ Programs that will be skipped/ignored when looking for active program.
 set -g @tmux_window_name_ignored_programs "['sqlite3']" # Default is []
 ```
 
-### `@tmux_window_name_max_name_len`
+### `@tmux_window_name_max_total_len`
 
 Maximum name length of a window
 
 ```tmux.conf
-set -g @tmux_window_name_max_name_len "30"
+set -g @tmux_window_name_max_total_len "30"
 ```
+
+### `@tmux_window_name_max_args_len`
+
+Maximum name length of a program args
+
+Examples: `[nvim a/b/c/d/e/f.txt] dir` -> `[nvim a/b/c/d...] dir`
+
+```tmux.conf
+set -g @tmux_window_name_max_args_len "30"
+```
+
 ### `@tmux_window_name_icon_style`
 
 Configure how icons are displayed in window names. \
@@ -233,7 +244,7 @@ set -g @tmux_window_name_icon_style "'name'"
 
 ### `@tmux_window_name_dir_icon`
 
-Configure the directory icon. 
+Configure the directory icon.
 ```tmux.conf
 set -g @tmux_window_name_dir_icon '…/'
 
@@ -292,7 +303,7 @@ set -g @tmux_window_name_substitute_sets "[('.+ipython([32])', 'ipython\g<1>'), 
 ### `@tmux_window_name_dir_substitute_sets`
 
 Replace dir lines with [re.sub](https://docs.python.org/3/library/re.html#re.sub). \
-The options expect list of tuples with 2 elements, `pattern` and `repl` as above. 
+The options expect list of tuples with 2 elements, `pattern` and `repl` as above.
 E.g: The example below will replace `tmux-resurrect` with `resurrect`
 
 ```tmux.conf
